@@ -73,7 +73,7 @@ class PublicFacingControllerTest < ActionController::TestCase
         @request.env['HTTP_ACCEPT'] = type
         get :test
         assert_equal 200, response.status, "mime type #{type} should be acceptable"
-        assert_equal Mime::HTML, response.content_type
+        assert_equal Mime[:html], response.content_type
       end
     end
   end
@@ -92,12 +92,12 @@ class PublicFacingControllerTest < ActionController::TestCase
     with_routing_for_test_controller do
       get :json
       assert_response :success
-      assert_equal Mime::HTML, response.content_type
+      assert_equal Mime[:html], response.content_type
       assert_equal 'html', response.body
 
       get :json, format: :json
       assert_response :success
-      assert_equal Mime::JSON, response.content_type
+      assert_equal Mime[:json], response.content_type
       assert_equal '{}', response.body
 
       get :json, format: :atom
@@ -109,7 +109,7 @@ class PublicFacingControllerTest < ActionController::TestCase
     with_routing_for_test_controller do
       get :js_or_atom
       assert_response :success
-      assert_equal Mime::HTML, response.content_type
+      assert_equal Mime[:html], response.content_type
       assert_equal 'html', response.body
 
       xhr :get, :js_or_atom

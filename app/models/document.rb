@@ -84,7 +84,7 @@ class Document < ApplicationRecord
   end
 
   def published?
-    published_edition(true).present?
+    reload_published_edition.present?
   end
 
   def first_published_date

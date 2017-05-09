@@ -15,19 +15,17 @@
 module LocalisedMappingPatch
   VALID_LOCALES_REGEX = Regexp.compile(Locale.non_english.map(&:code).join("|"))
 
-private
-
-  def initialize(scope, set, path, defaults, as, options)
+  def initialize(set, ast, defaults, controller, default_action, modyoule, to, formatted, scope_constraints, blocks, via, options_constraints, anchor, options)
     @localised_routing = options.delete(:localised)
     if localised_routing?
       options[:constraints] ||= {}
       options[:constraints][:locale] ||= VALID_LOCALES_REGEX
     end
-    super scope, set, path, defaults, as, options
+    super set, ast, defaults, controller, default_action, modyoule, to, formatted, scope_constraints, blocks, via, options_constraints, anchor, options
   end
 
   # Add the optional (.:locale) component to the path for localised routes.
-  def normalize_path!(path, format)
+  def self.normalize_path(path, format)
     # The below code is done before calling `super` as the overridden method may
     # add the :format component to the end of the path and we want the
     # "(.:locale)" component to come before that.
@@ -38,9 +36,11 @@ private
     super path, format
   end
 
+private
+
   # Add the default locale to the routing defaults for any localised routes.
   # This will default :locale to 'en' if it isn't explicitly present.
-  def normalize_defaults!(options)
+  def self.normalize_defaults(options)
     super(options)
 
     if localised_routing?
