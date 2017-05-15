@@ -1,13 +1,14 @@
 source 'https://rubygems.org'
 
 gem 'rake', '10.1.0'
-gem 'rails', '4.2.8'
-gem 'rack', '~> 1.6.2'
+gem 'rails', '5.0.2'
+gem 'rack', '~> 2.0'
 gem 'statsd-ruby', '~> 1.4.0', require: 'statsd'
 gem 'mysql2'
-gem 'jquery-ui-rails', '~> 4.1.1'
+gem 'jquery-ui-rails', '~> 4.2.1'
 gem 'transitions', require: ['transitions', 'active_record/transitions']
-gem 'carrierwave', '0.9.0'
+gem 'carrierwave', '~> 1.1.0'
+gem 'carrierwave-i18n'
 gem 'validates_email_format_of'
 gem 'friendly_id', '~> 5.2.1'
 gem 'babosa', '1.0.2'
@@ -21,7 +22,7 @@ gem 'unicorn', '5.3.0'
 gem 'kaminari', '~> 1.0.1'
 gem 'govuk_admin_template', '6.0.0'
 gem 'bootstrap-kaminari-views', '0.0.5'
-gem 'mime-types', '1.25.1'
+gem 'mime-types', '~> 3.1'
 gem 'whenever', '~> 0.9.7', require: false
 gem 'mini_magick', '~> 3.8.1'
 gem 'shared_mustache', '~> 1.0.0'
@@ -32,24 +33,29 @@ gem 'chronic'
 gem 'jbuilder'
 gem 'rack_strip_client_ip', '0.0.1'
 gem 'invalid_utf8_rejector', '~> 0.0.3'
-gem 'govuk_sidekiq', '0.0.4'
+gem 'govuk_sidekiq', '1.0.3'
 gem 'redis-namespace'
 gem 'raindrops', '0.18.0'
-gem 'airbrake', '4.1.0'
+gem 'airbrake', '6.0.0'
 gem 'pdf-reader', '~> 2.0'
 gem 'typhoeus', '~> 1.1'
 gem 'dalli'
 gem 'rails_translation_manager', '~> 0.0.2'
-gem 'sprockets', '~> 3.0'
+gem 'sprockets', '~> 3.7'
+# sprockets-rails is locked to v2.3.3 since v3+ is incompatible with test_track
 gem 'sprockets-rails', '2.3.3'
 gem 'rinku', require: 'rails_rinku'
 gem 'parallel', '~> 1.11.1'
 gem 'responders', '~> 2.4'
 gem 'ruby-progressbar', require: false
 gem 'equivalent-xml', '~> 0.6.0', require: false
+# globalize is retrieved directly from GitHub because many of the Rails 5 fixes
+# have not been released
+gem 'globalize', git: 'https://github.com/globalize/globalize'
+gem 'activemodel-serializers-xml'
+gem 'deprecated_columns', '~> 0.1.1'
+gem 'record_tag_helper', '~> 1.0'
 gem 'govuk_ab_testing', '~> 2.2.0'
-
-gem 'deprecated_columns', '0.1.1'
 
 if ENV['GDS_API_ADAPTERS_DEV']
   gem 'gds-api-adapters', path: '../gds-api-adapters'
@@ -57,22 +63,16 @@ else
   gem 'gds-api-adapters', '~> 45.0.0'
 end
 
-if ENV['GLOBALIZE_DEV']
-  gem 'globalize', path: '../globalize'
-else
-  gem 'globalize', '~> 5.0.0'
-end
-
 if ENV['GOVSPEAK_DEV']
   gem 'govspeak', path: '../govspeak'
 else
-  gem 'govspeak', '~> 3.6.2'
+  gem 'govspeak', '~> 5.0.3'
 end
 
 if ENV['FRONTEND_TOOLKIT_DEV']
   gem 'govuk_frontend_toolkit', path: '../govuk_frontend_toolkit_gem'
 else
-  gem 'govuk_frontend_toolkit', '5.0.3'
+  gem 'govuk_frontend_toolkit', '6.0.2'
 end
 
 gem 'sass', '~> 3.4.23'
@@ -92,7 +92,6 @@ group :development do
   gem 'better_errors'
   gem 'binding_of_caller'
   gem 'newrelic_rpm'
-  gem 'quiet_assets'
   gem 'stackprof', require: false
   gem 'graphviz_transitions'
 end
@@ -105,10 +104,13 @@ group :test do
   gem 'webmock', require: false
   gem 'ci_reporter_minitest'
   gem 'database_cleaner'
+  # test_track is retrieved directly from GitHub because we have made Rails 5
+  # fixes to a fork of the gem
   gem 'test_track', '~> 0.1.0', git: 'https://github.com/alphagov/test_track'
   gem 'govuk-content-schema-test-helpers'
   gem 'minitest-fail-fast'
   gem 'maxitest'
+  gem 'rails-controller-testing'
 end
 
 group :test_coverage do
