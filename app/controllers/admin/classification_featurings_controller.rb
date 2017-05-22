@@ -87,6 +87,6 @@ class Admin::ClassificationFeaturingsController < Admin::BaseController
   end
 
   def filter_values_set?
-    params.permit!.to_h.slice(:type, :author, :organisation, :title).length > 0
+    !params.permit!.to_h.slice(:type, :author, :organisation, :title).empty?
   end
 end

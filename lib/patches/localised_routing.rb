@@ -36,8 +36,6 @@ module LocalisedMappingPatch
     super path, format
   end
 
-private
-
   # Add the default locale to the routing defaults for any localised routes.
   # This will default :locale to 'en' if it isn't explicitly present.
   def self.normalize_defaults(options)
@@ -47,6 +45,9 @@ private
       @defaults[:locale] = I18n.default_locale.to_s
     end
   end
+  private_class_method :normalize_defaults
+
+private
 
   def localised_routing?
     @localised_routing
