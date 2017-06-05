@@ -27,7 +27,7 @@ module Whitehall
         incomplete_checkers = incomplete_checkers.reject do |checker|
           checker.check_progress
           if checker.is_complete? && checker.broken_links.any?
-            csv_for_organisation(checker.organisation) << csv_row_for(checker)
+            csv_for_organisation_slug(checker.organisation_slug) << csv_row_for(checker)
           end
           checker.is_complete?
         end
@@ -55,8 +55,7 @@ module Whitehall
       ]
     end
 
-    def csv_for_organisation(organisation)
-      slug = organisation.try(:slug) || 'no-organisation'
+    def csv_for_organisation_slug(slug)
       csv_reports[slug] ||= CsvReport.new(csv_report_path(slug))
     end
 
@@ -69,10 +68,21 @@ module Whitehall
     end
 
     class EditionChecker
-      attr_reader :edition, :last_report
+      attr_reader :last_report, :organisation_slug, :edition_type, :public_url,
+        :admin_url, :timestamp, :links
 
       def initialize(edition)
-        @edition = edition
+        @organisation_slug = organisation(edition).try(:slug) || 'no-organisation'
+        @edition_type = edition.type
+        @public_url = Whitehall.url_maker.public_document_url(
+          edition, host: public_host, protocol: 'https'
+        )
+        @admin_url = Whitehall.url_maker.admin_edition_url(
+          edition, host: admin_host, protocol: 'https'
+        )
+
+        @timestamp = edition.public_timestamp.to_s
+        @links = Govspeak::LinkExtractor.new(edition.body).links
       end
 
       def is_complete?
@@ -93,36 +103,6 @@ module Whitehall
 
       def batch_id
         last_report.id
-      end
-
-      def public_url
-        Whitehall.url_maker.public_document_url(edition, host: public_host, protocol: 'https')
-      end
-
-      def admin_url
-        Whitehall.url_maker.admin_edition_url(edition, host: admin_host, protocol: 'https')
-      end
-
-      def edition_type
-        edition.type
-      end
-
-      def organisation
-        if edition.respond_to?(:worldwide_organisations)
-          edition.worldwide_organisations.first || edition.organisations.first
-        elsif edition.respond_to?(:lead_organisations)
-          edition.lead_organisations.first || edition.organisations.first
-        else
-          edition.organisations.first
-        end
-      end
-
-      def timestamp
-        edition.public_timestamp.to_s
-      end
-
-      def links
-        @links ||= Govspeak::LinkExtractor.new(edition.body).links
       end
 
       def has_links?
@@ -148,6 +128,16 @@ module Whitehall
 
       def admin_host
         'whitehall-admin.publishing.service.gov.uk'
+      end
+
+      def organisation(edition)
+        if edition.respond_to?(:worldwide_organisations)
+          edition.worldwide_organisations.first || edition.organisations.first
+        elsif edition.respond_to?(:lead_organisations)
+          edition.lead_organisations.first || edition.organisations.first
+        else
+          edition.organisations.first
+        end
       end
     end
 
