@@ -6,7 +6,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
 
   test "shows worldwide organisation information" do
     organisation = create(:worldwide_organisation)
-    get :show, id: organisation.id
+    get :show, params: { id: organisation.id }
     assert_equal organisation, assigns(:worldwide_organisation)
   end
 
@@ -14,7 +14,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     organisation = create(:worldwide_organisation)
     create(:about_corporate_information_page, organisation: nil, worldwide_organisation: organisation, summary: 'my summary')
 
-    get :show, id: organisation.id
+    get :show, params: { id: organisation.id }
 
     assert_equal 'my summary', assigns(:meta_description)
   end
@@ -23,7 +23,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     organisation = create(:worldwide_organisation, :translated, :with_sponsorships)
     sponsoring_organisation = organisation.sponsoring_organisations.first
 
-    get :show, id: organisation.id
+    get :show, params: { id: organisation.id }
 
     expected_header_value = "<#{organisation.analytics_identifier}><#{sponsoring_organisation.analytics_identifier}>"
     assert_equal expected_header_value, response.headers["X-Slimmer-Organisations"]
@@ -33,7 +33,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     world_location = create(:world_location)
     organisation = create(:worldwide_organisation, world_locations: [world_location])
 
-    get :show, id: organisation.id
+    get :show, params: { id: organisation.id }
 
     assert_equal "<#{world_location.analytics_identifier}>", response.headers["X-Slimmer-World-Locations"]
   end
@@ -43,7 +43,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     location_2 = create(:world_location)
     organisation = create(:worldwide_organisation, world_locations: [location_1, location_2])
 
-    get :show, id: organisation.id
+    get :show, params: { id: organisation.id }
 
     assert_select "a[href='#{world_location_path(location_1)}']"
     assert_select "a[href='#{world_location_path(location_2)}']"
@@ -51,7 +51,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
 
   test "show redirects to the api worldwide organisation endpoint when json is requested" do
     organisation = create(:worldwide_organisation)
-    get :show, id: organisation.id, format: :json
+    get :show, params: { id: organisation.id }, format: :json
     assert_redirected_to api_worldwide_organisation_path(organisation, format: :json)
   end
 
@@ -59,7 +59,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     # needs to be a view_test so the entire view is rendered
     worldwide_organisation = create(:worldwide_organisation)
     worldwide_organisation.main_office = create(:worldwide_office, worldwide_organisation: worldwide_organisation)
-    get :show, id: worldwide_organisation
+    get :show, params: { id: worldwide_organisation }
 
     worldwide_organisation.reload
     refute worldwide_organisation.has_home_page_offices_list?
@@ -72,7 +72,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
                                     slug: "british-high-commission-new-delhi",
                                     world_locations: [world_location])
     with_variant WorldwidePublishingTaxonomy: "B", assert_meta_tag: false do
-      get :show, id: worldwide_organisation
+      get :show, params: { id: worldwide_organisation }
       assert_redirected_to world_location_path(world_location)
     end
   end
@@ -81,7 +81,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     world_location = create(:world_location)
     worldwide_organisation = create(:worldwide_organisation, world_locations: [world_location])
     with_variant WorldwidePublishingTaxonomy: "A", assert_meta_tag: false do
-      get :show, id: worldwide_organisation
+      get :show, params: { id: worldwide_organisation }
       assert_response :ok
     end
   end
@@ -91,7 +91,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
     world_location = create(:world_location, slug: location_not_under_test_slug)
     worldwide_organisation = create(:worldwide_organisation, world_locations: [world_location])
     with_variant WorldwidePublishingTaxonomy: "B", assert_meta_tag: false do
-      get :show, id: worldwide_organisation
+      get :show, params: { id: worldwide_organisation }
       assert_response :ok
     end
   end
@@ -106,7 +106,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
                                     world_locations: [world_location])
 
     with_variant WorldwidePublishingTaxonomy: "B", assert_meta_tag: false do
-      get :show, id: worldwide_organisation
+      get :show, params: { id: worldwide_organisation }
       assert_response :ok
     end
   end
@@ -120,7 +120,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       .update_attributes(name: "Le embassy de india")
 
     with_variant WorldwidePublishingTaxonomy: "B", assert_meta_tag: false do
-      get :show, id: worldwide_organisation, locale: "fr"
+      get :show, params: { id: worldwide_organisation, locale: "fr" }
       assert_response :ok
     end
   end
@@ -146,7 +146,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       )
 
       with_variant WorldwidePublishingTaxonomy: "B", assert_meta_tag: false do
-        get :show, id: worldwide_organisation
+        get :show, params: { id: worldwide_organisation }
         assert_redirected_to world_location_path(hard_coded_location)
       end
     end
@@ -157,7 +157,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       organisation = create(:worldwide_organisation)
       world_location = create(:world_location)
 
-      get :show_b_variant, id: organisation.id, world_location_id: world_location.id
+      get :show_b_variant, params: { id: organisation.id, world_location_id: world_location.id }
 
       assert_redirected_to worldwide_organisation_path(organisation)
     end
@@ -169,7 +169,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       world_location = create(:world_location)
       WorldwideAbTestHelper.any_instance.expects(:has_content_for?).returns(nil)
 
-      get :show_b_variant, id: organisation.id, world_location_id: world_location.id
+      get :show_b_variant, params: { id: organisation.id, world_location_id: world_location.id }
 
       assert_redirected_to worldwide_organisation_path(organisation)
     end
@@ -185,7 +185,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       }
       WorldwideAbTestHelper.any_instance.stubs(:has_content_for?).returns(true)
       WorldwideAbTestHelper.any_instance.expects(:content_for).with(world_location.slug).at_least_once.returns(data)
-      get :show_b_variant, id: worldwide_organisation.slug, world_location_id: world_location.slug
+      get :show_b_variant, params: { id: worldwide_organisation.slug, world_location_id: world_location.slug }
 
       assert_redirected_to worldwide_organisation_path(worldwide_organisation)
     end
@@ -199,7 +199,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       data = sample_yaml(worldwide_organisation)
       WorldwideAbTestHelper.any_instance.stubs(:has_content_for?).returns(true)
       WorldwideAbTestHelper.any_instance.expects(:content_for).with(world_location.slug).at_least_once.returns(data)
-      get :show_b_variant, id: worldwide_organisation.slug, world_location_id: world_location.slug
+      get :show_b_variant, params: { id: worldwide_organisation.slug, world_location_id: world_location.slug }
 
       assert_response 200
     end
@@ -215,7 +215,7 @@ class WorldwideOrganisationsControllerTest < ActionController::TestCase
       data = sample_yaml(worldwide_organisation)
       WorldwideAbTestHelper.any_instance.stubs(:has_content_for?).returns(true)
       WorldwideAbTestHelper.any_instance.expects(:content_for).with(world_location.slug).at_least_once.returns(data)
-      get :show_b_variant, id: worldwide_organisation.slug, world_location_id: world_location.slug, locale: :fr
+      get :show_b_variant, params: { id: worldwide_organisation.slug, world_location_id: world_location.slug, locale: :fr }
 
       assert_redirected_to worldwide_organisation_path(
         worldwide_organisation,

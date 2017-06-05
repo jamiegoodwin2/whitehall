@@ -145,7 +145,7 @@ class PublicFacingControllerTest < ActionController::TestCase
   test "all public facing requests with a locale should use the given locale" do
     with_routing_for_test_controller do
       I18n.default_locale = :tr
-      get :locale, locale: 'fr'
+      get :locale, params: { locale: 'fr' }
       assert_equal 'fr', response.body
     end
   end
@@ -153,7 +153,7 @@ class PublicFacingControllerTest < ActionController::TestCase
   test "all public facing requests with a locale should reset locale back to its original value after completion" do
     with_routing_for_test_controller do
       I18n.locale = :dr
-      get :locale, locale: 'fr'
+      get :locale, params: { locale: 'fr' }
       assert_equal :dr, I18n.locale
     end
   end
@@ -190,7 +190,7 @@ class PublicFacingControllerTest < ActionController::TestCase
   def with_routing_for_test_controller(&block)
     with_routing do |map|
       map.draw do
-        get '/test/:action(.:format)', controller: 'public_facing_controller_test/test'
+        get '/test/:action(.:format)', params: { controller: 'public_facing_controller_test/test' }
       end
       yield
     end

@@ -17,7 +17,7 @@ class TopicsControllerTest < ActionController::TestCase
 
     controller.expects(:expire_on_next_scheduled_publication).with(topic.scheduled_editions)
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select "h1", text: topic.name
     assert_select ".govspeak", text: topic.description
@@ -35,7 +35,7 @@ class TopicsControllerTest < ActionController::TestCase
       })
     end
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select "#publications" do
       published.take(3).each do |edition|
@@ -56,7 +56,7 @@ class TopicsControllerTest < ActionController::TestCase
       })
     end
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select "#consultations" do
       published.take(3).each do |edition|
@@ -75,7 +75,7 @@ class TopicsControllerTest < ActionController::TestCase
       })
     end
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select "#statistics" do
       published.take(3).each do |edition|
@@ -94,7 +94,7 @@ class TopicsControllerTest < ActionController::TestCase
       })
     end
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select "#announcements" do
       published.take(3).each do |edition|
@@ -113,7 +113,7 @@ class TopicsControllerTest < ActionController::TestCase
     end
     topic = create_topic_and_stub_content_store(editions: published_detailed_guides)
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select ".detailed-guidance" do
       published_detailed_guides.take(5).each do |guide|
@@ -132,7 +132,7 @@ class TopicsControllerTest < ActionController::TestCase
     publication_2 = create(:published_publication, topics: [topic])
     create(:classification_featuring, classification: topic, edition: publication_1)
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_select "#recently-updated" do
       assert_select_prefix_object publication_1, prefix = "recent"
@@ -148,7 +148,7 @@ class TopicsControllerTest < ActionController::TestCase
     topic = create_topic_and_stub_content_store
     publication = create(:published_publication, topics: [topic])
 
-    get :show, id: topic, format: :atom
+    get :show, params: { id: topic }, format: :atom
 
     assert_select_atom_feed do
       assert_select 'feed > id', 1
@@ -164,7 +164,7 @@ class TopicsControllerTest < ActionController::TestCase
 
   test 'GET :show has a 5 minute expiry time' do
     topic = create_topic_and_stub_content_store
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_cache_control("max-age=#{5.minutes}")
   end
@@ -173,7 +173,7 @@ class TopicsControllerTest < ActionController::TestCase
     topic = create_topic_and_stub_content_store
     create(:scheduled_publication, scheduled_publication: 1.day.from_now, topics: [topic])
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_cache_control("max-age=#{5.minutes}")
   end
@@ -183,7 +183,7 @@ class TopicsControllerTest < ActionController::TestCase
     topic = create_topic_and_stub_content_store
     topic.organisations << organisation
 
-    get :show, id: topic
+    get :show, params: { id: topic }
 
     assert_equal "<#{organisation.analytics_identifier}>", response.headers["X-Slimmer-Organisations"]
   end

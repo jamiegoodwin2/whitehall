@@ -14,7 +14,7 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
   should_be_an_admin_controller
 
   view_test 'index shows a form to create missing translations' do
-    get :index, world_location_id: @location
+    get :index, params: { world_location_id: @location }
     translations_path = admin_world_location_translations_path(@location)
     assert_select "form[action=?]", translations_path do
       assert_select "select[name=translation_locale]" do
@@ -28,7 +28,7 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
 
   view_test 'index omits existing translations from create select' do
     location = create(:world_location, translated_into: [:fr])
-    get :index, world_location_id: location
+    get :index, params: { world_location_id: location }
     assert_select "select[name=translation_locale]" do
       assert_select "option[value=fr]", count: 0
     end
@@ -36,13 +36,13 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
 
   view_test 'index omits create form if no missing translations' do
     location = create(:world_location, translated_into: [:fr, :es])
-    get :index, world_location_id: location
+    get :index, params: { world_location_id: location }
     assert_select "select[name=translation_locale]", count: 0
   end
 
   view_test 'index lists existing translations' do
     location = create(:world_location, translated_into: [:fr])
-    get :index, world_location_id: location
+    get :index, params: { world_location_id: location }
     edit_translation_path = edit_admin_world_location_translation_path(location, 'fr')
     view_location_path = world_location_path(location, locale: 'fr')
     assert_select "a[href=?]", edit_translation_path, text: 'Français'
@@ -50,34 +50,34 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
   end
 
   view_test 'index does not list the english translation' do
-    get :index, world_location_id: @location
+    get :index, params: { world_location_id: @location }
     edit_translation_path = edit_admin_world_location_translation_path(@location, 'en')
     assert_select "a[href=?]", edit_translation_path, text: 'en', count: 0
   end
 
   view_test 'index displays delete button for a translation' do
     location = create(:world_location, translated_into: [:fr])
-    get :index, world_location_id: location
+    get :index, params: { world_location_id: location }
     assert_select "form[action=?]", admin_world_location_translation_path(location, :fr) do
       assert_select "input[type='submit'][value=?]", "Delete"
     end
   end
 
   test 'create redirects to edit for the chosen language' do
-    post :create, world_location_id: @location, translation_locale: 'fr'
+    post :create, params: { world_location_id: @location, translation_locale: 'fr' }
     assert_redirected_to edit_admin_world_location_translation_path(@location, id: 'fr')
   end
 
   view_test 'edit indicates which language is being translated to' do
     location = create(:world_location, translated_into: [:fr])
-    get :edit, world_location_id: @location, id: 'fr'
+    get :edit, params: { world_location_id: @location, id: 'fr' }
     assert_select "h1", text: /Edit ‘Français \(French\)’ translation/
   end
 
   view_test 'edit presents a form to update an existing translation' do
     location = create(:world_location, translated_into: {fr: {name: 'Afrolasie', mission_statement: 'Enseigner aux gens comment infuser le thé'}})
 
-    get :edit, world_location_id: location, id: 'fr'
+    get :edit, params: { world_location_id: location, id: 'fr' }
 
     translation_path = admin_world_location_translation_path(location, 'fr')
 
@@ -91,7 +91,7 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
   view_test 'edit form adds right-to-left class and dir attribute for text field and areas in right-to-left languages' do
     location = create(:world_location, translated_into: {ar: {name: 'الناس', mission_statement: 'تعليم الناس كيفية تحضير الشاي'}})
 
-    get :edit, world_location_id: location, id: 'ar'
+    get :edit, params: { world_location_id: location, id: 'ar' }
 
     translation_path = admin_world_location_translation_path(location, 'ar')
 
@@ -107,10 +107,10 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
   end
 
   view_test 'update updates translation and redirects back to the index' do
-    put :update, world_location_id: @location, id: 'fr', world_location: {
+    put :update, params: { world_location_id: @location, id: 'fr', world_location: {
       name: 'Afrolasie',
       mission_statement: 'Enseigner aux gens comment infuser le thé'
-    }
+    } }
 
     @location.reload
 
@@ -123,10 +123,10 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
   end
 
   view_test 'update re-renders form if translation is invalid' do
-    put :update, world_location_id: @location, id: 'fr', world_location: {
+    put :update, params: { world_location_id: @location, id: 'fr', world_location: {
       name: '',
       mission_statement: 'Enseigner aux gens comment infuser le thé'
-    }
+    } }
 
     translation_path = admin_world_location_translation_path(@location, 'fr')
 
@@ -138,7 +138,7 @@ class Admin::WorldLocationTranslationsControllerTest < ActionController::TestCas
   test 'destroy removes translation and redirects to list of translations' do
     location = create(:world_location, translated_into: [:fr])
 
-    delete :destroy, world_location_id: location, id: 'fr'
+    delete :destroy, params: { world_location_id: location, id: 'fr' }
 
     location.reload
     refute location.translated_locales.include?(:fr)

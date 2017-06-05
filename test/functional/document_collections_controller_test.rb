@@ -17,7 +17,7 @@ class DocumentCollectionsControllerTest < ActionController::TestCase
     collection = create(:published_document_collection, title: "Some title", body: 'Description', summary: 'Some summary text')
 
     govspeak_transformation_fixture 'Description' => 'description-in-html' do
-      get :show, id: collection.slug
+      get :show, params: { id: collection.slug }
     end
 
     response_html = Nokogiri::HTML.parse(response.body)
@@ -36,7 +36,7 @@ class DocumentCollectionsControllerTest < ActionController::TestCase
     draft = create(:draft_publication)
     not_shown = create_group_from_editions(collection, 'Not shown', draft)
 
-    get :show, id: collection.slug
+    get :show, params: { id: collection.slug }
 
     assert_select 'h2', shown.heading
     assert_select '.group-body p', shown.body
@@ -49,7 +49,7 @@ class DocumentCollectionsControllerTest < ActionController::TestCase
     collection = create(:published_document_collection, body: 'Description', summary: 'Summary')
     group_1 = create_group_from_editions(collection, 'Group 1', create(:published_publication))
     group_2 = create_group_from_editions(collection, 'Group 2', create(:published_publication))
-    get :show, id: collection.slug
+    get :show, params: { id: collection.slug }
 
     assert_select "ol li a[href='##{group_1.slug}']", text: 'Group 1'
     assert_select "ol li a[href='##{group_2.slug}']", text: 'Group 2'
@@ -62,7 +62,7 @@ class DocumentCollectionsControllerTest < ActionController::TestCase
     collection.groups.first.documents << publication.document
 
     Timecop.freeze(Time.zone.now + Whitehall.document_collections_cache_max_age * 1.5) do
-      get :show, id: collection.slug
+      get :show, params: { id: collection.slug }
     end
 
     assert_cache_control("max-age=#{Whitehall.document_collections_cache_max_age / 2}")
@@ -73,7 +73,7 @@ class DocumentCollectionsControllerTest < ActionController::TestCase
     publication = create(:scheduled_publication, scheduled_publication: Time.zone.now + Whitehall.default_cache_max_age * 2)
     collection.groups.first.documents << publication.document
 
-    get :show, id: collection.slug
+    get :show, params: { id: collection.slug }
     assert_cache_control("max-age=#{Whitehall.document_collections_cache_max_age}")
   end
 
@@ -82,7 +82,7 @@ class DocumentCollectionsControllerTest < ActionController::TestCase
     publication = create(:publication)
     collection.groups.first.documents << publication.document
 
-    get :show, id: collection.slug
+    get :show, params: { id: collection.slug }
     assert_cache_control("max-age=#{Whitehall.document_collections_cache_max_age}")
   end
 end

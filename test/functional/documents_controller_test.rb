@@ -9,7 +9,7 @@ class DocumentsControllerTest < ActionController::TestCase
     login_as(:departmental_editor)
     edition = create(:draft_publication)
 
-    get :show, id: edition.document
+    get :show, params: { id: edition.document }
 
     assert_response :not_found
     assert_cache_control("max-age=#{5.minutes}")
@@ -21,7 +21,7 @@ class DocumentsControllerTest < ActionController::TestCase
 
     Whitehall.edition_services.deleter(edition).perform!
 
-    get :show, id: edition.unpublishing.slug
+    get :show, params: { id: edition.unpublishing.slug }
 
     assert_response :not_found
     assert_cache_control("max-age=#{5.minutes}")
@@ -31,7 +31,7 @@ class DocumentsControllerTest < ActionController::TestCase
     login_as(:departmental_editor)
     edition = create(:unpublished_publication)
 
-    get :show, id: edition.unpublishing.slug
+    get :show, params: { id: edition.unpublishing.slug }
 
     assert_response :success
     assert_template :unpublished
@@ -43,7 +43,7 @@ class DocumentsControllerTest < ActionController::TestCase
     edition = create(:unpublished_publication)
     edition.unpublishing.update_attributes(redirect: true, alternative_url: Whitehall.url_maker.root_url)
 
-    get :show, id: edition.unpublishing.slug
+    get :show, params: { id: edition.unpublishing.slug }
 
     assert_response :redirect
     assert_redirected_to edition.unpublishing.alternative_url
@@ -53,7 +53,7 @@ class DocumentsControllerTest < ActionController::TestCase
     edition = create(:scheduled_publication, scheduled_publication: Time.zone.now + Whitehall.default_cache_max_age * 2)
 
     Timecop.freeze(Time.zone.now + Whitehall.default_cache_max_age * 1.5) do
-      get :show, id: edition.document
+      get :show, params: { id: edition.document }
     end
 
     assert_select "h1", "Coming soon"
@@ -73,7 +73,7 @@ class DocumentsControllerTest < ActionController::TestCase
     assert new_draft.scheduled?
 
     Timecop.freeze(Time.zone.now + Whitehall.default_cache_max_age * 1.5) do
-      get :show, id: new_draft.document
+      get :show, params: { id: new_draft.document }
     end
 
     assert_response :ok
@@ -84,7 +84,7 @@ class DocumentsControllerTest < ActionController::TestCase
     edition = create(:scheduled_publication, scheduled_publication: Time.zone.now + Whitehall.default_cache_max_age * 10)
 
     Timecop.freeze(Time.zone.now + Whitehall.default_cache_max_age * 1.5) do
-      get :show, id: edition.document
+      get :show, params: { id: edition.document }
     end
 
     assert_select "h1", "Coming soon"
@@ -95,7 +95,7 @@ class DocumentsControllerTest < ActionController::TestCase
   test "show responds with 'not found' if document is deleted" do
     edition = create(:deleted_publication)
 
-    get :show, id: edition.document
+    get :show, params: { id: edition.document }
 
     assert_response :not_found
   end
@@ -104,7 +104,7 @@ class DocumentsControllerTest < ActionController::TestCase
     edition = create(:draft_publication, translated_into: 'fr')
     force_publish(edition)
 
-    get :show, id: edition.document, locale: 'fr'
+    get :show, params: { id: edition.document, locale: 'fr' }
 
     assert_response :success
   end
@@ -113,7 +113,7 @@ class DocumentsControllerTest < ActionController::TestCase
     edition = create(:draft_publication)
     force_publish(edition)
 
-    get :show, id: edition.document, locale: 'fr'
+    get :show, params: { id: edition.document, locale: 'fr' }
 
     assert_response :not_found
   end

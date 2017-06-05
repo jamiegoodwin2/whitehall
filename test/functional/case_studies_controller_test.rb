@@ -11,13 +11,13 @@ class CaseStudiesControllerTest < ActionController::TestCase
 
   test "shows published case study" do
     case_study = create(:published_case_study)
-    get :show, id: case_study.document
+    get :show, params: { id: case_study.document }
     assert_response :success
   end
 
   view_test "renders the summary from plain text" do
     case_study = create(:published_case_study, summary: 'plain *text* & so on')
-    get :show, id: case_study.document
+    get :show, params: { id: case_study.document }
 
     assert_select ".summary", text: "plain *text* & so on"
   end
@@ -25,7 +25,7 @@ class CaseStudiesControllerTest < ActionController::TestCase
   view_test "renders the body using govspeak" do
     case_study = create(:published_case_study, body: "body-in-govspeak")
     govspeak_transformation_fixture "body-in-govspeak" => "body-in-html" do
-      get :show, id: case_study.document
+      get :show, params: { id: case_study.document }
     end
 
     assert_select ".document", text: "body-in-html"
@@ -39,7 +39,7 @@ class CaseStudiesControllerTest < ActionController::TestCase
     updated_case_study.change_note = "change-note"
     force_publish(updated_case_study)
 
-    get :show, id: updated_case_study.document
+    get :show, params: { id: updated_case_study.document }
 
     assert_select ".meta" do
       assert_select ".date[datetime='#{updated_case_study.first_published_at.iso8601}']"
