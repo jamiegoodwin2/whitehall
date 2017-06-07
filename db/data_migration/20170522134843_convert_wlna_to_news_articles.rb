@@ -5,6 +5,12 @@ def update_db_records_to_news_article(editions)
   )
 end
 
+def update_unpublishings(editions)
+  edition_ids = editions.pluck(:id)
+  unpublishings = Unpublishing.where(edition_id: edition_ids)
+  unpublishings.update_all(document_type: "NewsArticle")
+end
+
 def update_rummager(editions)
   editions.each(&:save)
 end
@@ -33,6 +39,7 @@ wlna_documents.each do |wlna_document|
   editions = editions_including_deleted(wlna_document.id)
 
   update_db_records_to_news_article(editions)
+  update_unpublishings(editions)
   update_rummager(editions)
 
   PublishingApiDocumentRepublishingWorker.perform_async_in_queue("bulk_republishing", wlna_document.id)
