@@ -26,6 +26,13 @@ module LocalisedMappingPatch
 
   # Add the optional (.:locale) component to the path for localised routes.
   def self.normalize_path(path, format)
+    # NOTE: This method does not have access to the options hash anymore (used
+    # via `localised_routing`) as it's now a class method.
+    # In Rails, this used to be an instance method (see the changes here:
+    # https://github.com/rails/rails/commit/1eb6b4a679b05e443792430f11f084746005f6ff)
+    # So will have to rethink this. Also not 100% sure that this method is being
+    # called so maybe something wrong with the way the patch is being applied...
+
     # The below code is done before calling `super` as the overridden method may
     # add the :format component to the end of the path and we want the
     # "(.:locale)" component to come before that.
