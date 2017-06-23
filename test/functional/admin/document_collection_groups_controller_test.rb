@@ -155,6 +155,24 @@ class Admin::DocumentCollectionGroupsControllerTest < ActionController::TestCase
     assert_equal [@group_2.id, @group_1.id], @collection.reload.groups.pluck(:id)
   end
 
+  test "POST #update_memberships should cope with duplicate documents in group" do
+    given_two_groups_with_documents
+    post :update_memberships, {
+      document_collection_id: @collection.id,
+      groups: {
+        0 => {
+          id: @group_1.id,
+          document_ids: [
+            @doc_1_1.id,
+            @doc_1_1.id
+          ],
+          order: 0
+        }
+      }
+    }
+    assert_equal [@doc_1_1], @group_1.reload.documents
+  end
+
   test "POST #update_memberships should support moving memberships between groups" do
     given_two_groups_with_documents
     post :update_memberships, {
